@@ -1,0 +1,40 @@
+# Internal design material: never commit or publish.
+SixDegrees_Design.md
+docs/internal/
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Node / frontend build output
+node_modules/
+frontend/dist/
+
+# Terraform state, plans and real variable files
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
+
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*credentials*.json
+*service-account*.json
+
+# Release output (ZIP, release records)
+release/
+
+# Editors and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

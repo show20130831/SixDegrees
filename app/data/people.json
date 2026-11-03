@@ -1,0 +1,14 @@
+[
+  {"id": "u00", "display_name": "小安", "bio": "喜歡在週末找間安靜的咖啡店讀完一本書。", "city_id": "taipei", "interest_ids": ["coffee", "reading"]},
+  {"id": "u01", "display_name": "阿哲", "bio": "假日常往郊山跑，也愛逛美術館的特展。", "city_id": "taipei", "interest_ids": ["hiking", "museum"]},
+  {"id": "u02", "display_name": "小雨", "bio": "在臺中工作，收集各地展覽的導覽手冊與咖啡豆。", "city_id": "taichung", "interest_ids": ["museum", "coffee"]},
+  {"id": "u03", "display_name": "柏翰", "bio": "早上慢跑、晚上看書，想找一起運動的夥伴。", "city_id": "kaohsiung", "interest_ids": ["reading", "sport"]},
+  {"id": "u04", "display_name": "宜蓁", "bio": "爬完山喜歡帶本散文集在山頂休息。", "city_id": "taipei", "interest_ids": ["hiking", "reading"]},
+  {"id": "u05", "display_name": "冠宇", "bio": "百岳進度十二座，也常跑博物館看新展。", "city_id": "taipei", "interest_ids": ["hiking", "museum"]},
+  {"id": "u06", "display_name": "佳穎", "bio": "看展後一定要找間咖啡店整理心得。", "city_id": "taichung", "interest_ids": ["museum", "coffee"]},
+  {"id": "u07", "display_name": "俊傑", "bio": "籃球隊隊長，最近在讀運動心理學。", "city_id": "kaohsiung", "interest_ids": ["reading", "sport"]},
+  {"id": "u08", "display_name": "怡君", "bio": "手沖咖啡愛好者，每月讀完兩本小說。", "city_id": "taipei", "interest_ids": ["coffee", "reading"]},
+  {"id": "u09", "display_name": "承恩", "bio": "從高雄出發爬遍南部山徑，也愛看攝影展。", "city_id": "kaohsiung", "interest_ids": ["hiking", "museum"]},
+  {"id": "u10", "display_name": "子晴", "bio": "週末登山、平日逛展，喜歡認識新朋友。", "city_id": "taipei", "interest_ids": ["hiking", "museum"]},
+  {"id": "u11", "display_name": "品妤", "bio": "剛搬到臺北，正在找一起爬山看展的朋友。", "city_id": "taipei", "interest_ids": ["hiking", "museum"]}
+]
