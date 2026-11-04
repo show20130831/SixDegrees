@@ -6,6 +6,7 @@ import json
 import re
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, TypeAdapter
 
@@ -32,6 +33,8 @@ class _StrictModel(BaseModel):
 class Person(_StrictModel):
     id: str = Field(min_length=1)
     display_name: str = Field(min_length=1)
+    # Only used to pick a matching avatar style; never shown in the interface.
+    gender: Literal["female", "male"]
     bio: str
     city_id: str = Field(min_length=1)
     interest_ids: tuple[str, ...]

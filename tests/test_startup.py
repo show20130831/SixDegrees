@@ -32,6 +32,7 @@ BAD_DATA_CASES = {
     "missing viewer": ("people.json", lambda people: [p for p in people if p["id"] != "u00"]),
     "duplicate person": ("people.json", lambda people: people + [people[1]]),
     "missing field": ("people.json", lambda people: [{k: v for k, v in people[0].items() if k != "bio"}, *people[1:]]),
+    "unknown gender": ("people.json", _set_first_person("gender", "unknown")),
     "unknown edge endpoint": ("friendships.json", lambda edges: edges + [["u00", "u99"]]),
     "reversed duplicate edge": ("friendships.json", lambda edges: edges + [["u01", "u00"]]),
     "self loop": ("friendships.json", lambda edges: edges + [["u03", "u03"]]),

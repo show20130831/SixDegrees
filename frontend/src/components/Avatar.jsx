@@ -3,9 +3,9 @@ import { FALLBACK_AVATAR_URL, avatarUrl } from "../people.js";
 
 // Tries the primary avatar, then the local fallback exactly once, then gives up quietly.
 // Callers remount it per person (key={person.id}) so the retry state never leaks between people.
-export function useAvatarSource(personId) {
+export function useAvatarSource(personId, gender) {
   const [stage, setStage] = useState(0);
-  const sources = [avatarUrl(personId), FALLBACK_AVATAR_URL];
+  const sources = [avatarUrl(personId, gender), FALLBACK_AVATAR_URL];
   return {
     src: sources[stage] ?? null,
     onError: () => setStage((current) => current + 1),
@@ -13,8 +13,8 @@ export function useAvatarSource(personId) {
 }
 
 // Without a size the avatar fills its container, so CSS controls the dimensions.
-export default function Avatar({ personId, name, size }) {
-  const { src, onError } = useAvatarSource(personId);
+export default function Avatar({ personId, gender, name, size }) {
+  const { src, onError } = useAvatarSource(personId, gender);
   const style = size ? { width: size, height: size } : undefined;
   if (src === null) {
     return <span className="avatar avatar--empty" style={style} aria-hidden="true" />;

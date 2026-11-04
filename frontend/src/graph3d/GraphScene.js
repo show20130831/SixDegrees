@@ -264,12 +264,12 @@ export class GraphScene {
       labelElement,
       lift: 0,
     });
-    this.loadAvatar(node.id, canvases, textures);
+    this.loadAvatar(node, canvases, textures);
   }
 
   // Draws the avatar into both canvases once the image loads (primary, then fallback).
-  async loadAvatar(personId, canvases, textures) {
-    for (const url of [avatarUrl(personId), FALLBACK_AVATAR_URL]) {
+  async loadAvatar(node, canvases, textures) {
+    for (const url of [avatarUrl(node.id, node.gender), FALLBACK_AVATAR_URL]) {
       try {
         const image = await loadImage(url);
         if (this.disposed) {
