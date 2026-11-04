@@ -1,0 +1,5 @@
+# Example only. scripts/plan-deploy.ps1 passes these values on the command line, so a
+# real terraform.tfvars is not needed. If you create one, it stays out of Git.
+project_id = "your-project-id"
+region     = "asia-east1"
+image_uri  = "asia-east1-docker.pkg.dev/your-project-id/sixdegrees/app@sha256:0000000000000000000000000000000000000000000000000000000000000000"

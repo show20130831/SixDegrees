@@ -91,9 +91,68 @@ request and every push to `main`, with no path filters:
 | --- | --- |
 | Backend tests | Installs `requirements-dev.txt` and runs pytest |
 | Frontend tests and build | `npm ci`, `npm test`, `npm run build` |
+| Terraform format and validate | `terraform fmt -check`, then `init -backend=false` and `validate`, without cloud credentials |
 | Container build and smoke test | Builds the image with the commit SHA as its version, starts it, and runs `scripts/smoke_test.py`: health and version, home page and assets, API contracts, and a known search |
 
 Releases are built and deployed from a local machine; CI does not deploy.
+
+## Deploy to Google Cloud
+
+The service runs on Cloud Run in `asia-east1`, with images in a private Artifact Registry
+repository. Terraform ([infra/](infra/)) manages the Cloud Run service and its runtime
+service account. The project, billing, enabled APIs and the image repository are set up
+beforehand, so only part of the cloud setup is managed as code.
+
+**Prerequisites:** PowerShell 7, Docker Desktop, the Google Cloud CLI and Terraform 1.16, a
+Google Cloud project with billing enabled, and the Python virtual environment from
+[Local development](#local-development) (the smoke test runs with it). Sign in once:
+
+```powershell
+gcloud auth login
+gcloud auth application-default login
+gcloud auth application-default set-quota-project <project-id>
+```
+
+**Release steps,** run from the repository root on a clean `main`:
+
+```powershell
+# One time: enable APIs, create the image repository, configure Docker.
+pwsh -File scripts/bootstrap.ps1 -ProjectId <project-id>
+
+# Build, smoke-test and push the image for the current commit. First open the main CI run
+# for this commit on GitHub Actions and check that it succeeded.
+pwsh -File scripts/build-push.ps1 -ProjectId <project-id> -CiRunUrl <run-url> -ConfirmCiPassed
+
+# Plan the deployment, read the plan, then apply exactly that plan.
+pwsh -File scripts/plan-deploy.ps1 -ProjectId <project-id>
+terraform -chdir=infra apply sixdegrees.tfplan
+
+# Check the public service and record the result.
+pwsh -File scripts/verify.ps1
+```
+
+| Script | What it does |
+| --- | --- |
+| [bootstrap.ps1](scripts/bootstrap.ps1) | Checks the account, project and billing flag; enables Cloud Run, Artifact Registry and IAM; creates the repository; configures Docker |
+| [build-push.ps1](scripts/build-push.ps1) | Requires a clean `main` equal to `origin/main` and a confirmed CI run; builds a linux/amd64 image versioned with the commit SHA, smoke-tests it, pushes it and reads the digest back from Artifact Registry |
+| [plan-deploy.ps1](scripts/plan-deploy.ps1) | Runs `terraform init` and `plan` with the image digest and saves the plan; never applies |
+| [verify.ps1](scripts/verify.ps1) | Confirms Terraform deployed the recorded image, smoke-tests the public URL without credentials, and prints a short manual checklist |
+
+Each run writes `release/release-record.json` (commit, image digest, CI run, verification
+result). `release/`, Terraform state, plans and variable files stay out of Git; back up
+`infra/terraform.tfstate` privately after each apply.
+
+**Service settings:** 0 to 1 instances (scales to zero, so the first request may be a cold
+start), 1 vCPU and 512 MiB with request-based billing, concurrency 80, a 60-second request
+timeout and a startup probe on `/healthz`. The URL is public because the data is fictional
+and read-only; the image repository and source code stay private.
+
+**Roll back** by planning with a previously verified digest:
+`pwsh -File scripts/plan-deploy.ps1 -ProjectId <project-id> -ImageUri <image@sha256:...>`.
+
+**Remove the demo** after the review with `terraform -chdir=infra destroy -var=project_id=<project-id> -var=image_uri=<deployed image>`, after reading its plan (deletion protection
+is off), then delete the Artifact Registry repository separately; removing the service
+does not remove stored images.
 
 ## API
 
