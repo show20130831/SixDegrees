@@ -136,3 +136,9 @@ test("cancelling while waiting for the position ignores the late callback", asyn
   await new Promise((resolve) => setTimeout(resolve, 0));
   assert.equal(fetchImpl.urls.length, 0, "no city lookup after cancelling");
 });
+
+test("the browser may reuse a recent position, but not an old one", () => {
+  assert.equal(POSITION_OPTIONS.maximumAge, 10 * 60 * 1000);
+  assert.equal(POSITION_OPTIONS.timeout, 10_000);
+  assert.equal(POSITION_OPTIONS.enableHighAccuracy, false);
+});

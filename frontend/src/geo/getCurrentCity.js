@@ -8,7 +8,15 @@
 import { normalizeCity } from "./normalizeCity.js";
 
 export const REVERSE_GEOCODE_URL = "https://api.bigdatacloud.net/data/reverse-geocode-client";
-export const POSITION_OPTIONS = Object.freeze({ maximumAge: 0, timeout: 10_000, enableHighAccuracy: false });
+// A city only needs a rough position, so the browser may reuse a position it found in the
+// last 10 minutes instead of locating again (desktop Wi-Fi positioning takes seconds).
+// Permission is still checked on every call; the cached position stays in the browser.
+export const POSITION_MAX_AGE_MS = 10 * 60 * 1000;
+export const POSITION_OPTIONS = Object.freeze({
+  maximumAge: POSITION_MAX_AGE_MS,
+  timeout: 10_000,
+  enableHighAccuracy: false,
+});
 export const LOOKUP_TIMEOUT_MS = 10_000;
 
 // kind: unsupported | denied | position-timeout | position-unavailable | invalid-coordinates |
