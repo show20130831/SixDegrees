@@ -6,6 +6,9 @@
     <meta name="description" content="近緣 SixDegrees：從既有人際關係中，依城市與興趣探索想進一步認識的人（展示版，人物皆為虛構）。" />
     <!-- No favicon is shipped; an empty data URI prevents a /favicon.ico request. -->
     <link rel="icon" href="data:," />
+    <!-- Opens the connection to the city lookup early. crossorigin matches the anonymous
+         CORS fetch, so the browser can reuse this connection. -->
+    <link rel="preconnect" href="https://api.bigdatacloud.net" crossorigin />
     <title>近緣｜SixDegrees</title>
   </head>
   <body>
