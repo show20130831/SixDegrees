@@ -35,7 +35,7 @@ def test_network_returns_two_hop_subgraph_only(client: TestClient) -> None:
     assert u05["distance"] == 2
     assert u05["via_ids"] == ["u01", "u02"]
     assert set(u05) == {
-        "id", "display_name", "bio", "city_id", "interest_ids", "distance", "via_ids",
+        "id", "display_name", "gender", "bio", "city_id", "interest_ids", "distance", "via_ids",
     }
     assert all("u10" not in edge and "u11" not in edge for edge in body["edges"])
 

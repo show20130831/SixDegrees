@@ -4,6 +4,9 @@ import { copyFilters, describeFilters, emptyFilters, isEmptyFilters } from "./fi
 import FilterPanel from "./components/FilterPanel.jsx";
 import PersonDetails from "./components/PersonDetails.jsx";
 import RelationshipGraph from "./components/RelationshipGraph.jsx";
+import { GeoError, describeGeoError, getCurrentCity } from "./geo/getCurrentCity.js";
+
+const GEO_IDLE = { status: "idle", stage: null, message: "" };
 
 const isAborted = (error) => error instanceof ApiError && error.kind === "aborted";
 
@@ -19,7 +22,10 @@ export default function App() {
   const [hasSuccessfulSearch, setHasSuccessfulSearch] = useState(false);
   const [search, setSearch] = useState({ status: "idle", error: null });
   const [selectedPersonId, setSelectedPersonId] = useState(null);
+  // "Use my city": status is idle, working (with a stage) or error.
+  const [geo, setGeo] = useState(GEO_IDLE);
 
+  const geoControllerRef = useRef(null);
   const initBatchRef = useRef(0);
   const initControllerRef = useRef(null);
   const searchRequestRef = useRef(0);
@@ -93,6 +99,7 @@ export default function App() {
       searchRequestRef.current += 1;
       initControllerRef.current?.abort();
       searchControllerRef.current?.abort();
+      geoControllerRef.current?.abort();
     };
   }, [initialize]);
 
@@ -144,7 +151,54 @@ export default function App() {
     }));
   };
 
+  // Locating only fills in the draft city; the search runs when the user applies the filters.
+  const locateCity = async () => {
+    geoControllerRef.current?.abort();
+    const controller = new AbortController();
+    geoControllerRef.current = controller;
+    setGeo({ status: "working", stage: "locating", message: "" });
+    const isCurrent = () => geoControllerRef.current === controller && !controller.signal.aborted;
+
+    try {
+      const city = await getCurrentCity(options.cities, {
+        signal: controller.signal,
+        onStage: (stage) => {
+          if (isCurrent()) {
+            setGeo({ status: "working", stage, message: "" });
+          }
+        },
+      });
+      if (!isCurrent()) {
+        return;
+      }
+      setDraftFilters((draft) => ({ ...draft, city: city.city_id }));
+      setGeo(GEO_IDLE);
+    } catch (error) {
+      if (!isCurrent() || (error instanceof GeoError && error.kind === "aborted")) {
+        return;
+      }
+      setGeo({ status: "error", stage: null, message: describeGeoError(error) });
+    } finally {
+      if (geoControllerRef.current === controller) {
+        geoControllerRef.current = null;
+      }
+    }
+  };
+
+  // Cancels a running lookup (late answers are ignored) and clears the message.
+  const resetGeo = () => {
+    geoControllerRef.current?.abort();
+    geoControllerRef.current = null;
+    setGeo(GEO_IDLE);
+  };
+
+  const changeCity = (city) => {
+    resetGeo();
+    setDraftFilters((draft) => ({ ...draft, city }));
+  };
+
   const clearFilters = () => {
+    resetGeo();
     setDraftFilters(emptyFilters());
     runSearch(emptyFilters());
   };
@@ -171,7 +225,10 @@ export default function App() {
             draft={draftFilters}
             options={options}
             disabled={searching}
-            onCityChange={(city) => setDraftFilters((draft) => ({ ...draft, city }))}
+            geo={geo}
+            onCityChange={changeCity}
+            onLocate={locateCity}
+            onCancelLocate={resetGeo}
             onToggleInterest={toggleInterest}
             onApply={() => runSearch(draftFilters)}
             onClear={clearFilters}
@@ -221,6 +278,15 @@ export default function App() {
 
       <footer className="site-footer">
         <p>近緣 SixDegrees 展示版。所有人物、好友關係與簡介皆為虛構，「關係距離」僅代表最短好友連結數。</p>
+        <p>
+          頭像：
+          <a href="https://www.dicebear.com/styles/personas/" target="_blank" rel="noreferrer">Personas</a>
+          {" "}by Draftbit，經 DiceBear 提供，授權
+          {" "}<a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">CC BY 4.0</a>；
+          本站將頭像裁切為圓形顯示，未符合篩選時改以灰階呈現。
+          城市定位：
+          <a href="https://www.bigdatacloud.com/" target="_blank" rel="noreferrer">BigDataCloud</a>。
+        </p>
       </footer>
     </div>
   );

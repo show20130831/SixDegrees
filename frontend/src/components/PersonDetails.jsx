@@ -92,7 +92,7 @@ export default function PersonDetails({
       aria-labelledby="person-card-heading"
     >
       <div className="person-card__header">
-        <Avatar key={person.id} personId={person.id} name={person.display_name} size={56} />
+        <Avatar key={person.id} personId={person.id} gender={person.gender} name={person.display_name} size={56} />
         <div className="person-card__title">
           <h2 id="person-card-heading">
             {person.display_name}

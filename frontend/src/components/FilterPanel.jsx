@@ -1,8 +1,17 @@
+const GEO_STAGE_MESSAGES = {
+  "awaiting-permission": "請在瀏覽器選擇是否允許定位。",
+  locating: "正在取得你的位置…",
+  lookup: "正在查詢所在縣市…",
+};
+
 export default function FilterPanel({
   draft,
   options,
   disabled,
+  geo,
   onCityChange,
+  onLocate,
+  onCancelLocate,
   onToggleInterest,
   onApply,
   onClear,
@@ -26,6 +35,29 @@ export default function FilterPanel({
               <option key={city.id} value={city.id}>{city.name}</option>
             ))}
           </select>
+
+          <div className="locate">
+            <button
+              type="button"
+              className="button button--small"
+              onClick={onLocate}
+              disabled={disabled || geo.status === "working"}
+            >
+              使用我的城市
+            </button>
+            {geo.status === "working" && (
+              <button type="button" className="button button--small button--quiet" onClick={onCancelLocate}>
+                取消定位
+              </button>
+            )}
+          </div>
+          <p
+            className={geo.status === "error" ? "locate__status locate__status--error" : "locate__status"}
+            role="status"
+            aria-live="polite"
+          >
+            {geo.status === "working" ? GEO_STAGE_MESSAGES[geo.stage] : geo.message}
+          </p>
         </div>
 
         <fieldset className="filter-panel__field" disabled={disabled}>

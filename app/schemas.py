@@ -30,6 +30,7 @@ class OptionsResponse(BaseModel):
 class NetworkNodeResponse(BaseModel):
     id: str
     display_name: str
+    gender: str
     bio: str
     city_id: str
     interest_ids: list[str]

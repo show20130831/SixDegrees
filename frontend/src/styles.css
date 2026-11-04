@@ -151,7 +151,7 @@ select {
 .filter-panel__controls {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: 16px 28px;
 }
 
@@ -173,6 +173,37 @@ select {
   border: 1px solid var(--color-border);
   border-radius: 10px;
   background: var(--color-surface);
+}
+
+/* "Use my city" under the city select */
+.locate {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.button--quiet {
+  border-color: transparent;
+  background: none;
+  color: var(--color-muted);
+  text-decoration: underline;
+}
+
+.locate__status {
+  max-width: 260px;
+  margin: 6px 0 0;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--color-muted);
+}
+
+.locate__status:empty {
+  display: none;
+}
+
+.locate__status--error {
+  color: var(--color-primary-strong);
 }
 
 .chips {
@@ -203,6 +234,8 @@ select {
 .filter-panel__actions {
   display: flex;
   gap: 10px;
+  /* Lines the buttons up with the select and chips below their labels. */
+  margin-top: calc(1.6em + 6px);
 }
 
 .filter-panel__status {
@@ -569,9 +602,21 @@ select {
   text-align: center;
 }
 
+.site-footer p {
+  margin: 4px 0;
+}
+
+.site-footer a {
+  color: var(--color-primary-strong);
+}
+
 @media (max-width: 640px) {
   .app {
     padding: 16px 12px 24px;
+  }
+
+  .filter-panel__actions {
+    margin-top: 0;
   }
 
   .site-header h1 {

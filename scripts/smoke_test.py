@@ -150,7 +150,7 @@ def check_api(base_url: str) -> None:
     check(body.get("viewer_id") == "u00", "/api/network viewer is u00")
     check(len(nodes) == EXPECTED_NODE_COUNT, f"/api/network has {EXPECTED_NODE_COUNT} visible nodes")
     check(
-        all({"id", "display_name", "city_id", "interest_ids", "distance", "via_ids"} <= node.keys() for node in nodes),
+        all({"id", "display_name", "gender", "city_id", "interest_ids", "distance", "via_ids"} <= node.keys() for node in nodes),
         "every network node has the required fields",
     )
     check(isinstance(body.get("edges"), list) and body["edges"], "/api/network has edges")
