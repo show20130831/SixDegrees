@@ -10,7 +10,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": backend,
-      "/healthz": backend,
+      "/health": backend,
     },
   },
   build: {

@@ -10,10 +10,16 @@ def result_ids(response) -> list[str]:
     return [item["id"] for item in response.json()["items"]]
 
 
-def test_healthz_reports_configured_version(client: TestClient) -> None:
-    response = client.get("/healthz")
+def test_health_reports_configured_version(client: TestClient) -> None:
+    response = client.get("/health")
     assert response.status_code == 200
     assert response.json() == {"status": "ok", "version": "test"}
+
+
+def test_no_route_ends_in_z(client: TestClient) -> None:
+    # Cloud Run answers some paths ending in "z" (such as /healthz) itself with a 404.
+    paths = [route.path for route in client.app.routes]
+    assert [path for path in paths if path.endswith("z")] == []
 
 
 def test_options_list_all_22_cities_and_fixed_interest_order(client: TestClient) -> None:
