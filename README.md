@@ -16,13 +16,18 @@ fictional.
 
 | Layer | Technology |
 | --- | --- |
+| Frontend | React, Vite, JavaScript (JSX), CSS; 3D graph rendered with three.js (WebGL) |
 | Backend | Python 3.12, FastAPI, Uvicorn, Pydantic |
 | Data | Read-only JSON files bundled with the application |
-| Tests | pytest, FastAPI TestClient |
+| Tests | pytest with FastAPI TestClient; Node.js built-in test runner |
 
-## Local development (backend)
+The user interface is in Traditional Chinese; code and documentation are in English.
 
-Commands use PowerShell 7 (`pwsh`) on Windows.
+## Local development
+
+Commands use PowerShell 7 (`pwsh`) on Windows. Requirements: Python 3.12 and Node.js 26 LTS.
+
+### Backend
 
 ```powershell
 py -3.12 -m venv .venv
@@ -34,6 +39,59 @@ py -3.12 -m venv .venv
 # Start the API with auto-reload on http://localhost:8000
 .venv\Scripts\python.exe -m uvicorn app.main:create_app --factory --reload
 ```
+
+### Frontend
+
+In a second terminal, with the backend running:
+
+```powershell
+cd frontend
+npm ci
+
+# Run the unit tests
+npm test
+
+# Start the Vite dev server on http://localhost:5173 (proxies /api to port 8000)
+npm run dev
+```
+
+### Serve the production build from FastAPI
+
+```powershell
+cd frontend; npm run build; cd ..
+$env:REQUIRE_FRONTEND = "1"
+.venv\Scripts\python.exe -m app   # http://localhost:8080
+```
+
+### Run the container
+
+The production image is a multi-stage build: a Node stage builds the frontend, and the
+final Python image serves the API and the built files as a non-root user. Docker Desktop
+with the WSL2 engine is enough on Windows.
+
+```powershell
+docker build --build-arg GIT_SHA=dev --tag sixdegrees:local .
+docker run --rm --name sixdegrees --publish 8080:8080 sixdegrees:local   # http://localhost:8080
+```
+
+With the container running, a second terminal can run the same smoke test as CI:
+
+```powershell
+.venv\Scripts\python.exe scripts\smoke_test.py --base-url http://127.0.0.1:8080 --expected-version dev --container sixdegrees
+```
+
+## Continuous integration
+
+GitHub Actions ([.github/workflows/ci.yml](.github/workflows/ci.yml)) runs on every pull
+request and every push to `main`, with no path filters:
+
+| Job | Checks |
+| --- | --- |
+| Backend tests | Installs `requirements-dev.txt` and runs pytest |
+| Frontend tests and build | `npm ci`, `npm test`, `npm run build` |
+| Container build and smoke test | Builds the image with the commit SHA as its version, starts it, and runs `scripts/smoke_test.py`: health and version, home page and assets, API contracts, and a known search |
+
+Releases are built and deployed from a local machine; CI does not deploy.
 
 ## API
 

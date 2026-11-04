@@ -1,0 +1,26 @@
+# Keep the build context to what the Dockerfile copies. Git-ignored is not Docker-ignored.
+.git/
+.github/
+infra/
+**/*.tfstate*
+**/*.tfvars
+**/*.tfvars.json
+**/*.tfplan
+**/.terraform/
+.venv/
+**/node_modules/
+frontend/dist/
+docs/
+tests/
+scripts/
+**/__pycache__/
+**/.pytest_cache/
+**/.env*
+**/*.pem
+**/*.key
+**/*credentials*.json
+**/*service-account*.json
+release/
+
+# Internal design material never leaves this machine.
+SixDegrees_Design.md
