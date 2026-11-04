@@ -50,7 +50,7 @@ resource "google_cloud_run_v2_service" "app" {
         cpu_idle = true
       }
 
-      # /healthz succeeds only after the data has been loaded and validated. The probe
+      # /health succeeds only after the data has been loaded and validated. The probe
       # never depends on DiceBear or BigDataCloud. 5 s x 12 gives a 60-second window.
       startup_probe {
         initial_delay_seconds = 0
@@ -59,7 +59,7 @@ resource "google_cloud_run_v2_service" "app" {
         failure_threshold     = 12
 
         http_get {
-          path = "/healthz"
+          path = "/health"
           port = 8080
         }
       }

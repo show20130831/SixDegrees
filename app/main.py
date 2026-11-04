@@ -5,7 +5,7 @@ instance (including each test) is configured independently:
 
 - FRONTEND_DIST_DIR: Vite build output; defaults to <repo>/frontend/dist.
 - REQUIRE_FRONTEND: "1" makes a missing or incomplete frontend build a startup failure.
-- APP_VERSION: reported by /healthz; defaults to "dev".
+- APP_VERSION: reported by /health; defaults to "dev".
 """
 
 from __future__ import annotations
@@ -95,8 +95,10 @@ def create_app(*, data_dir: Path | None = None) -> FastAPI:
 
     app = FastAPI(title="SixDegrees", version=settings.app_version, lifespan=lifespan)
 
-    @app.get("/healthz", response_model=HealthResponse)
-    def healthz() -> HealthResponse:
+    # Not /healthz: Cloud Run reserves some URL paths ending in "z" and answers them with
+    # its own 404 before the request reaches the container.
+    @app.get("/health", response_model=HealthResponse)
+    def health() -> HealthResponse:
         return HealthResponse(status="ok", version=settings.app_version)
 
     @app.get("/api/options", response_model=OptionsResponse)

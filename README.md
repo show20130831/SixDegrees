@@ -144,7 +144,7 @@ result). `release/`, Terraform state, plans and variable files stay out of Git; 
 
 **Service settings:** 0 to 1 instances (scales to zero, so the first request may be a cold
 start), 1 vCPU and 512 MiB with request-based billing, concurrency 80, a 60-second request
-timeout and a startup probe on `/healthz`. The URL is public because the data is fictional
+timeout and a startup probe on `/health`. The URL is public because the data is fictional
 and read-only; the image repository and source code stay private.
 
 **Roll back** by planning with a previously verified digest:
@@ -160,7 +160,7 @@ All endpoints are read-only `GET` requests.
 
 | Path | Description |
 | --- | --- |
-| `/healthz` | Health check with the running version |
+| `/health` | Health check with the running version |
 | `/api/options` | All 22 Taiwan cities and the five interests |
 | `/api/network` | The two-hop subgraph: viewer, nodes with `distance` and `via_ids`, and edges |
 | `/api/people` | Search results ordered by distance, matched interest count, then ID |
@@ -213,6 +213,6 @@ self-host the avatars or obtain them another way while keeping the Personas lice
 | Variable | Default | Purpose |
 | --- | --- | --- |
 | `PORT` | `8080` | Listening port for `python -m app` |
-| `APP_VERSION` | `dev` | Version reported by `/healthz` |
+| `APP_VERSION` | `dev` | Version reported by `/health` |
 | `FRONTEND_DIST_DIR` | `frontend/dist` | Location of the built frontend |
 | `REQUIRE_FRONTEND` | `0` | When `1`, startup fails if the frontend build is incomplete |

@@ -17,7 +17,7 @@ param(
     # Defaults to the Terraform output service_url.
     [string]$BaseUrl,
 
-    # Seconds to wait for /healthz; includes a possible cold start.
+    # Seconds to wait for /health; includes a possible cold start.
     [int]$Timeout = 90
 )
 

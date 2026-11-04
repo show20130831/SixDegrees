@@ -1,6 +1,6 @@
 """Smoke test for a running SixDegrees container, using only the standard library.
 
-Waits for /healthz, then checks the version, the home page and its static assets,
+Waits for /health, then checks the version, the home page and its static assets,
 the JSON API contracts and one known search. Exits 1 on the first failure.
 
     python scripts/smoke_test.py --base-url http://127.0.0.1:8080 --expected-version <sha> \
@@ -80,22 +80,22 @@ def wait_until_healthy(base_url: str, timeout: float, container: str | None) -> 
         if container and not container_running(container):
             raise SmokeTestError(f"container {container} exited before becoming healthy")
         try:
-            response = fetch(urljoin(base_url, "/healthz"))
+            response = fetch(urljoin(base_url, "/health"))
             if response.status == 200:
                 return response
             last_error = f"status {response.status}"
         except (urllib.error.URLError, ConnectionError, TimeoutError) as error:
             last_error = str(error)
         time.sleep(POLL_INTERVAL_SECONDS)
-    raise SmokeTestError(f"/healthz not ready within {timeout:.0f}s ({last_error})")
+    raise SmokeTestError(f"/health not ready within {timeout:.0f}s ({last_error})")
 
 
 def check_health(response: Response, expected_version: str) -> None:
     body = response.json()
-    check(body.get("status") == "ok", "/healthz reports status ok")
+    check(body.get("status") == "ok", "/health reports status ok")
     check(
         body.get("version") == expected_version,
-        f"/healthz version is {expected_version} (got {body.get('version')!r})",
+        f"/health version is {expected_version} (got {body.get('version')!r})",
     )
 
 
@@ -166,7 +166,7 @@ def main() -> int:
     parser.add_argument("--base-url", default="http://127.0.0.1:8080")
     parser.add_argument("--expected-version", required=True)
     parser.add_argument("--container", help="Docker container to watch for an early exit")
-    parser.add_argument("--timeout", type=float, default=60, help="seconds to wait for /healthz")
+    parser.add_argument("--timeout", type=float, default=60, help="seconds to wait for /health")
     args = parser.parse_args()
     base_url = args.base_url.rstrip("/") + "/"
 
