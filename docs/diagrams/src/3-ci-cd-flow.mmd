@@ -1,0 +1,55 @@
+---
+title: "CI/CD: from code to production (CI automated · release manual)"
+---
+flowchart TB
+    subgraph SRC["1 · Source · GitHub repository (private)"]
+        direction LR
+        branch["Feature branch"] --> pr["Pull request<br/>purpose · changes · tests"]
+    end
+
+    subgraph CI["2 · Continuous integration · GitHub Actions · every PR and every push to main · no cloud credentials"]
+        direction LR
+        be["Backend tests<br/>pytest"]
+        fe["Frontend tests + build<br/>node --test · Vite"]
+        tfv["Terraform<br/>fmt · validate"]
+        dk["Docker build<br/>+ container smoke test"]
+    end
+
+    pr --> be & fe & tfv & dk
+    be & fe & tfv & dk --> gate{"All 4 checks<br/>passed?"}
+    gate -- "no" --> fix["Fix and push<br/>to the branch"] --> pr
+    gate -- "yes" --> review["Review diff and results"]
+    review --> merge["Merge to main<br/>delete branch"]
+    merge --> mainci["CI runs again<br/>on the main commit"]
+
+    subgraph REL["3 · Release · operator workstation · manual, scripted"]
+        direction TB
+        confirm["Confirm main CI passed<br/>for this exact commit"]
+        build["Build linux/amd64 image<br/>version = commit SHA"]
+        smoke["Local smoke test"]
+        push["Push to Artifact Registry<br/>read back the digest"]
+        plan["Terraform plan<br/>image pinned by digest"]
+        approve{"Operator reads<br/>the plan"}
+        apply["Terraform apply<br/>(exactly that plan)"]
+        confirm --> build --> smoke --> push --> plan --> approve
+        approve -- "approved" --> apply
+    end
+
+    mainci --> confirm
+
+    subgraph RUN["4 · Runtime · Cloud Run"]
+        direction LR
+        rev["New revision<br/>startup probe /health"] --> traffic["Traffic switches to<br/>the ready revision"]
+    end
+
+    apply --> rev
+
+    subgraph VER["5 · Release verification"]
+        direction TB
+        verify["Public smoke test without credentials<br/>/health = released commit · pages · API · known search"]
+        record["Release record<br/>commit · digest · CI run · result"]
+        verify --> record
+    end
+
+    traffic --> verify
+    verify -. "failed: plan again with the<br/>previous verified digest" .-> plan

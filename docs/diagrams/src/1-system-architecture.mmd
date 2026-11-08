@@ -1,0 +1,39 @@
+---
+title: "System architecture: how SixDegrees works"
+---
+flowchart LR
+    user(["User"])
+
+    subgraph browser["User's browser"]
+        direction TB
+        ui["<b>React frontend</b><br/>3D relationship graph<br/>filter panel · profile card"]
+    end
+
+    subgraph server["SixDegrees server (one container)"]
+        direction TB
+        api["<b>FastAPI backend</b><br/>REST API · validates city and interests"]
+        service["<b>Relationship service</b><br/>in-process module<br/>city + interest filter · ranking"]
+        memory[("<b>In-memory graph</b><br/>people · friendships<br/>precomputed two-hop network")]
+        loader["<b>Startup loader</b><br/>validate data · two-hop BFS<br/>runs once per instance"]
+        json[("JSON files<br/>people · friendships · options")]
+    end
+
+    subgraph external["Browser-side API calls (third-party)"]
+        direction TB
+        avatars["DiceBear<br/>avatar images"]
+        geo["BigDataCloud<br/>reverse geocoding<br/>coordinates → city"]
+    end
+
+    user -- "1 · chooses Taipei + hiking" --> ui
+    ui -- "2 · REST request<br/>GET /api/people?city=…&interest=…" --> api
+    api -- "3 · valid filters" --> service
+    service -- "4 · reads" --> memory
+    service -. "5 · ranked matches" .-> api
+    api -. "6 · JSON: matched people IDs<br/>distance · interests matching the filter" .-> ui
+    ui -. "7 · matches pulse on the graph" .-> user
+
+    json == "A · read" ==> loader
+    loader == "B · builds" ==> memory
+
+    ui -- "avatar per person" --> avatars
+    ui -- "'Use my city'<br/>browser geolocation → coordinates<br/>(with permission)" --> geo

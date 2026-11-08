@@ -1,0 +1,12 @@
+{
+  "name": "sixdegrees-diagrams",
+  "private": true,
+  "type": "module",
+  "description": "Renders the Mermaid diagrams in src/ to PNG files in output/.",
+  "scripts": {
+    "render": "node render.mjs"
+  },
+  "devDependencies": {
+    "@mermaid-js/mermaid-cli": "12.2.0"
+  }
+}

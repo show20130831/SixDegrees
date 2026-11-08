@@ -1,0 +1,18 @@
+---
+title: Git workflow for a team (proposed)
+---
+flowchart TD
+    issue["Issue / task"] --> sync["Update local main"]
+    sync --> branch["Create feature branch"]
+    branch --> work["Commit in small steps"]
+    work --> rebase["Rebase on latest main"]
+    rebase --> pr["Open pull request<br/>linked issue · description · test notes"]
+    pr --> ci["CI checks"]
+    pr --> review["Code review by a teammate"]
+    ci -- "fail" --> work
+    review -- "changes requested" --> work
+    ci -- "pass" --> gate{"Branch protection on main:<br/>CI passed and<br/>at least one approval?"}
+    review -- "approved" --> gate
+    gate -- "yes" --> merge["Squash merge to main"]
+    merge --> cleanup["Delete branch · close issue"]
+    merge --> release["Release from main<br/>(see CI/CD flow)"]
