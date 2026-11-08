@@ -52,7 +52,7 @@ flowchart LR
 
     subgraph L8["Source and delivery layer"]
         direction TB
-        repo["GitHub repository<br/>private"]
+        repo["GitHub repository<br/>public"]
         actions["GitHub Actions · CI only<br/>tests · image build · smoke test<br/>no push · no deploy · no cloud credentials"]
         operator["Operator workstation<br/>Docker build · Terraform<br/>(local state, backed up privately)"]
         repo --> actions

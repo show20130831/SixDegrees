@@ -40,7 +40,7 @@ Avatars and reverse geocoding are called from the browser, not from the backend.
 
 ![Deployment architecture](docs/diagrams/output/2-deployment-architecture.png)
 
-- **GitHub:** private repository; GitHub Actions runs CI only.
+- **GitHub:** public repository; GitHub Actions runs CI only.
 - **Docker:** one image holds the API and the built frontend, built on the operator's machine.
 - **Artifact Registry:** private repository; images are deployed by digest.
 - **Cloud Run:** runs the container in `asia-east1` behind Google-managed HTTPS.

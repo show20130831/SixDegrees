@@ -61,8 +61,8 @@ result). `release/`, Terraform state, plans and variable files stay out of Git; 
 - A startup probe on `/health`.
 - A runtime service account with no project-level IAM roles.
 
-The URL is public because the data is fictional and read-only; the image repository and
-source code stay private.
+The URL is public because the data is fictional and read-only; the image repository stays
+private.
 
 ## Roll back
 
