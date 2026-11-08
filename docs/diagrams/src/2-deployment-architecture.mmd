@@ -1,0 +1,73 @@
+---
+title: "Deployment architecture: where SixDegrees runs"
+---
+flowchart LR
+    subgraph L1["User layer"]
+        direction TB
+        browser["Visitor's browser<br/>runs the React app"]
+    end
+
+    subgraph L7["Third-party services<br/>browser direct access · no API keys stored"]
+        direction TB
+        dicebear["DiceBear<br/>avatars"]
+        bdc["BigDataCloud<br/>reverse geocoding"]
+    end
+
+    subgraph L2["Access layer"]
+        https["Internet · HTTPS<br/>Google-managed TLS<br/>public *.run.app URL<br/>no sign-in (fictional, read-only data)"]
+    end
+
+    subgraph gcp["Google Cloud project"]
+        direction TB
+
+        subgraph L3["Application layer · Cloud Run service 'sixdegrees' · asia-east1 (Taiwan)<br/>0–1 instances · 1 vCPU · 512 MiB · request-based billing<br/>startup probe /health · every 5 s, up to 12 tries"]
+            direction TB
+            revision["Revision<br/>image digest + revision configuration"]
+            subgraph ctr["Application container · non-root · port 8080 · one Uvicorn worker"]
+                direction TB
+                static["Frontend static assets<br/>React build: HTML · JS · CSS"]
+                fastapi["FastAPI backend<br/>REST API /api/* · /health"]
+                engine["Relationship service<br/>filter + ranking"]
+                dataset[("Data layer<br/>JSON files bundled in the image<br/>read-only<br/>two-hop graph built in RAM<br/>at startup")]
+                fastapi -- "in-process call" --> engine --> dataset
+                fastapi -- "serves / and /assets/*" --> static
+            end
+        end
+
+        subgraph L5["IAM layer"]
+            direction TB
+            sa["Runtime service account<br/>sixdegrees-run<br/>no project roles · least privilege"]
+            invoker["Public invoker access<br/>IAM invoker check disabled<br/>anyone with the URL can call it"]
+        end
+
+        subgraph L6["Observability and cost layer · built into Google Cloud"]
+            direction TB
+            logging["Cloud Logging<br/>request logs + app logs"]
+            monitoring["Cloud Monitoring<br/>request count · latency<br/>instance count · CPU · memory"]
+            budget["Billing budget alert<br/>email at 50 / 90 / 100 %"]
+        end
+
+        ar[("Artifact Registry · asia-east1<br/>private Docker repository<br/>images by digest")]
+    end
+
+    subgraph L8["Source and delivery layer"]
+        direction TB
+        repo["GitHub repository<br/>public"]
+        actions["GitHub Actions · CI only<br/>tests · image build · smoke test<br/>no push · no deploy · no cloud credentials"]
+        operator["Operator workstation<br/>Docker build · Terraform<br/>(local state, backed up privately)"]
+        repo --> actions
+        repo -- "verified main" --> operator
+    end
+
+    browser --> https --> ctr
+    browser -.-> dicebear
+    browser -.-> bdc
+    sa -. "runs as" .-> ctr
+    ctr -. "stdout / stderr" .-> logging
+    L3 -. "platform request logs" .-> logging
+    L3 -. "built-in platform metrics" .-> monitoring
+    invoker -. "service setting" .-> L3
+    revision -- "starts instances" --> ctr
+    ar -- "image imported<br/>by digest" --> revision
+    operator -- "docker push" --> ar
+    operator -- "terraform apply<br/>create / update revision" --> revision

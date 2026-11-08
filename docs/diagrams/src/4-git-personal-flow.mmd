@@ -1,0 +1,14 @@
+---
+title: Git workflow used in this project (one developer)
+---
+flowchart LR
+    main(["main"]) --> branch["Short-lived branch<br/>feature/* · fix/* · docs/*"]
+    branch --> commit["Commits"]
+    commit --> pr["Pull request<br/>purpose · changes · tests"]
+    pr --> ci["CI checks"]
+    ci -- "fail" --> commit
+    ci -- "pass" --> self["Self-review of<br/>diff and results"]
+    self -- "changes needed" --> commit
+    self -- "approve" --> merge["Merge to main"]
+    merge --> del["Delete the branch"]
+    merge --> main
